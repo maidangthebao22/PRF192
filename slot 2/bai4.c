@@ -1,9 +1,13 @@
 #include <stdio.h>
-int main(){
-	float a=5;
-	float b=10.216;
-	printf ("a=%.0f\n",a);
-	printf ("b=%.3f\n",b);
-	printf ("5+10.216=15.22");
-	
+
+int main() {
+    float a = 5.0f;
+    float b = 10.216f;
+    float kq = a + b;
+
+    printf("a: %.0f\n", a);
+    printf("%.3f\n", b);
+    printf("%.0f + %.3f = %.2f", a, b, kq);
+
+    return 0;
 }
