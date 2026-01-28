@@ -19,7 +19,7 @@ int main() {
 		return 0;
 	}
 	tongket = cc*0.1 + gk*0.3 + ck*0.6;
-	if (tongket >= 8){
+	if (tongket >= 8.5){
 		diemchu = 'A';
 	}
 	else if (tongket >= 7.0){
