@@ -34,7 +34,8 @@ int main() {
 	else{
 		diemchu = 'F';
 	}
-	printf ("Diem Tong ket: %c\n", diemchu);
+	printf ("Diem chu: %c\n", diemchu);
+	printf ("Diem Tong ket: %.2f\n", tongket);
 	if (cc < 4 || gk < 4 || ck < 4 || diemchu == 'F'){
 		printf ("KHONG DU DIEU KIEN TOT NGHIEP");
 	}
