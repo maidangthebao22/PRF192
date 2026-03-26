@@ -2,146 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 #define FILENAME "products.bin"
+
 struct product{
     int id;
     char name[50];
     float price;
-    int quantity;    
-};
+    int quantity;
+}product;
+
 void menu();
-void ghimoi();
-void them();
-void doc();
-void chinhsua();
-int kiemtratrung(int id);
+void writeProducts();
+void appendProducts();
+void readProducts();
+void modifyProduct();
+int checkDuplicate(int id);
+
 
 void menu(){
-    printf("\n===== PRODUCT MANAGEMENT =====\n");
-    printf("1. Ghi moi\n");
-    printf("2. Them\n");
-    printf("3. Doc\n");
-    printf("4. Chinh sua\n");
-    printf("5. Thoat\n");
-    printf("Lua chon: ");
+    printf("\n-- Product Management System --\n");
+    printf("1. Write Products\n");
+    printf("2. Append Products\n");
+    printf("3. Read Products\n");
+    printf("4. Modify Product\n");
+    printf("5. Exit\n");
+    printf("Enter your choice: ");
 }
-void ghimoi(){
-    FILE *f = fopen(FILENAME, "wb");
-    if(f == NULL){
-        printf("Khong mo duoc file\n");
-        return;
-    }
-    int n;
-    printf("Nhap so luong san pham: ");
-    scanf("%d", &n);
 
-    struct product p;
-    for(int i = 0; i < n; i++){
-        printf("\nSan pham %d\n", i+1);
 
-        printf("Nhap id: ");
-        scanf("%d", &p.id);
-
-        if(kiemtratrung(p.id)){
-            printf("ID bi trung!\n");
-            i--;
-            continue;
-        }
-
-        getchar();
-        printf("Nhap ten: ");
-        fgets(p.name, sizeof(p.name), stdin);
-
-        printf("Nhap gia: ");
-        scanf("%f", &p.price);
-
-        printf("Nhap so luong: ");
-        scanf("%d", &p.quantity);
-
-        fwrite(&p, sizeof(struct product), 1, f);
-    }
-    fclose(f);
-}
-void them(){
-    FILE *f = fopen(FILENAME, "ab");
-    if(f == NULL){
-        printf("Khong mo duoc file\n");
-        return;
-    }
-    struct product p;
-    printf("Nhap id: ");
-    scanf("%d", &p.id);
-    if(kiemtratrung(p.id)){
-        printf("ID bi trung!\n");
-        fclose(f);
-        return;
-    }
-    getchar();
-    printf("Nhap ten: ");
-    fgets(p.name, sizeof(p.name), stdin);
-    printf("Nhap gia: ");
-    scanf("%f", &p.price);
-    printf("Nhap so luong: ");
-    scanf("%d", &p.quantity);
-    fwrite(&p, sizeof(struct product), 1, f);
-    fclose(f);
-}
-void doc(){
-    FILE *f = fopen(FILENAME, "rb");
-    if(f == NULL){
-        printf("Chua co du lieu\n");
-        return;
-    }
-    struct product p;
-    printf("\n===== DANH SACH SAN PHAM =====\n");
-    while(fread(&p, sizeof(struct product), 1, f)){
-        printf("ID: %d\n", p.id);
-        printf("Ten: %s", p.name);
-        printf("Gia: %.2f\n", p.price);
-        printf("So luong: %d\n", p.quantity);
-        printf("----------------------\n");
-    }
-    fclose(f);
-}
-void chinhsua(){
-    FILE *f = fopen(FILENAME, "rb+");
-    if(f == NULL){
-        printf("Khong mo duoc file\n");
-        return;
-    }
-    int id;
-    printf("Nhap id can sua: ");
-    scanf("%d", &id);
-    struct product p;
-    int found = 0;
-    while(fread(&p, sizeof(struct product), 1, f)){
-        if(p.id == id){
-            found = 1;
-
-            getchar();
-            printf("Nhap ten moi: ");
-            fgets(p.name, sizeof(p.name), stdin);
-
-            printf("Nhap gia moi: ");
-            scanf("%f", &p.price);
-
-            printf("Nhap so luong moi: ");
-            scanf("%d", &p.quantity);
-
-            fseek(f, -sizeof(struct product), SEEK_CUR);
-            fwrite(&p, sizeof(struct product), 1, f);
-
-            printf("Da cap nhat thanh cong!\n");
-            break;
-        }
-    }
-    if(!found){
-        printf("Khong tim thay ID\n");
-    }
-    fclose(f);
-}
-int kiemtratrung(int id){
+int checkDuplicate(int id){
     FILE *f = fopen(FILENAME, "rb");
     if(f == NULL) return 0;
+
     struct product p;
     while(fread(&p, sizeof(struct product), 1, f)){
         if(p.id == id){
@@ -152,20 +43,180 @@ int kiemtratrung(int id){
     fclose(f);
     return 0;
 }
+
+void writeProducts(){
+    FILE *f = fopen(FILENAME, "wb");
+    if(f == NULL){
+        printf("Cannot open file!\n");
+        return;
+    }
+
+    int n;
+    printf("Enter the number of products to write: ");
+    scanf("%d", &n);
+
+    struct product p;
+    for(int i = 0; i < n; i++){
+        printf("\nEnter details for product %d:\n", i+1);
+
+        printf("Product ID: ");
+        scanf("%d", &p.id);
+
+        if(checkDuplicate(p.id)){
+            printf("Duplicate ID! Re-enter.\n");
+            i--;
+            continue;
+        }
+
+        getchar();
+        printf("Product Name: ");
+        fgets(p.name, sizeof(p.name), stdin);
+        p.name[strcspn(p.name, "\n")] = 0;
+
+        printf("Price: ");
+        scanf("%f", &p.price);
+
+        printf("Quantity: ");
+        scanf("%d", &p.quantity);
+
+        fwrite(&p, sizeof(struct product), 1, f);
+    }
+
+    fclose(f);
+    printf("\nProducts have been written to the file successfully.\n");
+}
+
+
+void appendProducts(){
+    FILE *f = fopen(FILENAME, "ab");
+    if(f == NULL){
+        printf("Cannot open file!\n");
+        return;
+    }
+
+    int n;
+    printf("Enter the number of products to append: ");
+    scanf("%d", &n);
+
+    struct product p;
+    for(int i = 0; i < n; i++){
+        printf("\nEnter details for product %d:\n", i+1);
+
+        printf("Product ID: ");
+        scanf("%d", &p.id);
+
+        if(checkDuplicate(p.id)){
+            printf("Duplicate ID! Re-enter.\n");
+            i--;
+            continue;
+        }
+
+        getchar();
+        printf("Product Name: ");
+        fgets(p.name, sizeof(p.name), stdin);
+        p.name[strcspn(p.name, "\n")] = 0;
+
+        printf("Price: ");
+        scanf("%f", &p.price);
+
+        printf("Quantity: ");
+        scanf("%d", &p.quantity);
+
+        fwrite(&p, sizeof(struct product), 1, f);
+    }
+
+    fclose(f);
+    printf("\nProducts have been appended to the file successfully.\n");
+}
+
+void readProducts(){
+    FILE *f = fopen(FILENAME, "rb");
+    if(f == NULL){
+        printf("No data available.\n");
+        return;
+    }
+
+    struct product p;
+
+    printf("\nReading products from the file:\n");
+    printf("-----------------------------------------------------\n");
+    printf("%-15s %-20s %-8s %-10s\n", "Product ID", "Product Name", "Price", "Quantity");
+    printf("-----------------------------------------------------\n");
+
+    while(fread(&p, sizeof(struct product), 1, f)){
+        printf("%-15d %-20s %-8.2f %-10d\n",
+               p.id, p.name, p.price, p.quantity);
+    }
+
+    printf("-----------------------------------------------------\n");
+
+    fclose(f);
+}
+
+void modifyProduct(){
+    FILE *f = fopen(FILENAME, "rb+");
+    if(f == NULL){
+        printf("Cannot open file!\n");
+        return;
+    }
+
+    int id;
+    printf("Enter the Product ID to modify: ");
+    scanf("%d", &id);
+
+    struct product p;
+    int found = 0;
+
+    while(fread(&p, sizeof(struct product), 1, f)){
+        if(p.id == id){
+            found = 1;
+
+            printf("Product found. Enter new details:\n");
+
+            getchar();
+            printf("New Product Name: ");
+            fgets(p.name, sizeof(p.name), stdin);
+            p.name[strcspn(p.name, "\n")] = 0;
+
+            printf("New Price: ");
+            scanf("%f", &p.price);
+
+            printf("New Quantity: ");
+            scanf("%d", &p.quantity);
+
+            fseek(f, -sizeof(struct product), SEEK_CUR);
+            fwrite(&p, sizeof(struct product), 1, f);
+
+            printf("Product updated successfully.\n");
+            break;
+        }
+    }
+
+    if(!found){
+        printf("Product ID not found.\n");
+    }
+
+    fclose(f);
+}
+
+
 int main(){
-    int chon;
+    int choice;
+
     do{
         menu();
-        scanf("%d", &chon);
+        scanf("%d", &choice);
 
-        switch(chon){
-            case 1: ghimoi(); break;
-            case 2: them(); break;
-            case 3: doc(); break;
-            case 4: chinhsua(); break;
-            case 5: printf("Thoat chuong trinh\n"); break;
-            default: printf("Lua chon khong hop le\n");
+        switch(choice){
+            case 1: writeProducts(); break;
+            case 2: appendProducts(); break;
+            case 3: readProducts(); break;
+            case 4: modifyProduct(); break;
+            case 5: printf("Exiting...\n"); break;
+            default: printf("Invalid choice!\n");
         }
-    }while(chon != 5);
+
+    }while(choice != 5);
+
     return 0;
 }
